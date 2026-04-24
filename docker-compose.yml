@@ -1,0 +1,11 @@
+name: tune-share-hub-frontend
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tune-share-hub-frontend-app
+    ports:
+      - "${APP_PORT:-4173}:4173"
+    restart: unless-stopped
