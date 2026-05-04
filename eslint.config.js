@@ -1,10 +1,11 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import { createRequire } from 'module'
 
-const compat = new FlatCompat()
+const require = createRequire(import.meta.url)
+const nextConfig = require('eslint-config-next')
 
 const config = [
   { ignores: ['.next'] },
-  ...compat.extends('next/core-web-vitals'),
+  ...nextConfig,
 ]
 
 export default config
