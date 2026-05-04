@@ -2,6 +2,8 @@
 node_modules/
 
 # 빌드 결과물
+.next/
+out/
 dist/
 dist-ssr/
 
