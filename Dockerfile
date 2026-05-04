@@ -10,7 +10,6 @@ RUN npm run build
 FROM node:20-slim
 WORKDIR /app
 
-COPY --from=build /workspace/public ./public
 COPY --from=build /workspace/.next/standalone ./
 COPY --from=build /workspace/.next/static ./.next/static
 

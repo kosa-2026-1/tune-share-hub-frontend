@@ -3,7 +3,7 @@
 .idea
 .vscode
 node_modules
-dist
+.next
 *.log
 .env
 .env.local
