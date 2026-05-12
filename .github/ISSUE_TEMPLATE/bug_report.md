@@ -1,7 +1,7 @@
 ---
-name: Bug report
+name: Fix
 about: React/Vue 프론트엔드 오류를 제보합니다.
-title: "[Bug] "
+title: "[Fix] "
 labels: bug
 assignees: ""
 ---

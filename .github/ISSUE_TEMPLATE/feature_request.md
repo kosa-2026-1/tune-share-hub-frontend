@@ -1,7 +1,7 @@
 ---
-name: Feature request
+name: Feat
 about: React/Vue 프론트엔드 기능 추가 또는 개선을 제안합니다.
-title: "[Feature] "
+title: "[Feat] "
 labels: enhancement
 assignees: ""
 ---
@@ -38,6 +38,7 @@ assignees: ""
 - [ ] 기능이 정상 동작합니다.
 - [ ] 예외 상황(로딩, 에러, 빈 데이터)이 처리됩니다.
 - [ ] 반응형이 적용되어 있습니다.
+- [ ] Bootstrap 기반 UI 규칙을 따릅니다.
 - [ ] README 또는 관련 문서가 업데이트되었습니다.
 
 ## 추가 정보
