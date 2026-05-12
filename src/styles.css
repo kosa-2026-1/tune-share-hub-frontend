@@ -249,6 +249,31 @@ a {
   background: var(--tsh-bg-alt);
 }
 
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--tsh-border-soft);
+  border-radius: 999px;
+  color: var(--tsh-text);
+  background: var(--tsh-bg-alt);
+  font-size: 0.85rem;
+}
+
+.tag-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  color: var(--tsh-text-muted);
+  background: transparent;
+}
+
 .login-brand-panel {
   background: var(--tsh-accent-soft);
 }

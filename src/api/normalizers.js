@@ -53,6 +53,23 @@ export function toPlaylistTrackCreateRequest(track) {
   }
 }
 
+export function toPlaylistFormData(form) {
+  const formData = new FormData()
+  formData.append('title', form.title.trim())
+  formData.append('description', form.description.trim())
+  formData.append('public_yn', form.publicYn)
+
+  normalizeTags(form.tags).forEach((tag) => {
+    formData.append('tags', tag)
+  })
+
+  if (form.coverImageFile) {
+    formData.append('coverImage', form.coverImageFile)
+  }
+
+  return formData
+}
+
 export function applyLikeResponseToPlaylist(playlist, likeResponse) {
   if (!playlist || !likeResponse) return playlist
 
@@ -62,4 +79,11 @@ export function applyLikeResponseToPlaylist(playlist, likeResponse) {
     liked: likeResponse.status === 'LIKED',
     likeStatus: likeResponse.status,
   }
+}
+
+function normalizeTags(tags) {
+  return (Array.isArray(tags) ? tags : [])
+    .map((tag) => String(tag).trim())
+    .filter(Boolean)
+    .slice(0, 5)
 }

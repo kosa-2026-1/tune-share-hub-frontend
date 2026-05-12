@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { applyLikeResponseToPlaylist, normalizePlaylistPage, unwrapApiResponse } from './normalizers.js'
+import {
+  applyLikeResponseToPlaylist,
+  normalizePlaylistPage,
+  toPlaylistFormData,
+  unwrapApiResponse,
+} from './normalizers.js'
 
 describe('unwrapApiResponse', () => {
   it('returns data from a successful API envelope', () => {
@@ -66,5 +71,35 @@ describe('applyLikeResponseToPlaylist', () => {
     const playlist = { playlistId: 1, likeCount: 3 }
 
     expect(applyLikeResponseToPlaylist(playlist, null)).toBe(playlist)
+  })
+})
+
+describe('toPlaylistFormData', () => {
+  it('serializes playlist fields, tags, and cover image for multipart requests', () => {
+    const file = new File(['cover'], 'cover.png', { type: 'image/png' })
+    const formData = toPlaylistFormData({
+      title: '  제목  ',
+      description: '  설명  ',
+      publicYn: 'N',
+      tags: ['rock', 'k-pop'],
+      coverImageFile: file,
+    })
+
+    expect(formData.get('title')).toBe('제목')
+    expect(formData.get('description')).toBe('설명')
+    expect(formData.get('public_yn')).toBe('N')
+    expect(formData.getAll('tags')).toEqual(['rock', 'k-pop'])
+    expect(formData.get('coverImage')).toBe(file)
+  })
+
+  it('limits tags to five non-empty values', () => {
+    const formData = toPlaylistFormData({
+      title: '제목',
+      description: '',
+      publicYn: 'Y',
+      tags: ['a', 'b', '', 'c', 'd', 'e', 'f'],
+    })
+
+    expect(formData.getAll('tags')).toEqual(['a', 'b', 'c', 'd', 'e'])
   })
 })

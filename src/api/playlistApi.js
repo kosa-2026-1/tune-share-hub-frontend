@@ -23,11 +23,21 @@ export async function getPlaylistDetail(id, userId) {
 }
 
 export async function createPlaylist(userId, payload) {
-  return request({ method: 'post', url: '/api/playlists', params: { userId }, data: payload })
+  return request({
+    method: 'post',
+    url: '/api/playlists',
+    params: { userId },
+    data: payload,
+  })
 }
 
 export async function updatePlaylist(id, userId, payload) {
-  return request({ method: 'put', url: `/api/playlists/${id}`, params: { userId }, data: payload })
+  return request({
+    method: 'put',
+    url: `/api/playlists/${id}`,
+    params: { userId },
+    data: payload,
+  })
 }
 
 export async function deletePlaylist(id, userId) {
