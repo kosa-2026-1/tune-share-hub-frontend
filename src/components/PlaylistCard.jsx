@@ -1,6 +1,7 @@
 import { Heart, ListMusic } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getTrackCount, isPublicPlaylist } from '../utils/format.js'
+import { PlaylistCoverImage } from './PlaylistCoverImage.jsx'
 
 export function PlaylistCard({ playlist }) {
   const trackCount = getTrackCount(playlist)
@@ -10,11 +11,7 @@ export function PlaylistCard({ playlist }) {
     <article className="playlist-card h-100">
       <Link to={`/playlists/${playlist.playlistId}`} className="text-decoration-none">
         <div className="thumb">
-          {playlist.coverImageUrl ? (
-            <img src={playlist.coverImageUrl} alt="" />
-          ) : (
-            <ListMusic size={44} color="#9b9b9b" />
-          )}
+          <PlaylistCoverImage src={playlist.coverImageUrl} />
         </div>
         <div className="p-3">
           <div className="d-flex justify-content-between gap-2 mb-2">

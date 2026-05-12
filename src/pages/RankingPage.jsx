@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getPlaylistRanking } from '../api/playlistApi.js'
+import { PlaylistCoverImage } from '../components/PlaylistCoverImage.jsx'
 import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 
@@ -22,7 +23,9 @@ export function RankingPage() {
             <div className="col-md-4" key={playlist.playlistId}>
               <Link to={`/playlists/${playlist.playlistId}`} className="surface d-block text-center p-4 text-decoration-none">
                 <div className="display-6 fw-bold text-success">#{index + 1}</div>
-                <div className="thumb my-3">{playlist.coverImageUrl ? <img src={playlist.coverImageUrl} alt="" /> : null}</div>
+                <div className="thumb my-3">
+                  <PlaylistCoverImage src={playlist.coverImageUrl} />
+                </div>
                 <div className="fw-bold text-truncate">{playlist.title}</div>
                 <div className="small text-secondary">♥ {playlist.likeCount ?? 0} · 🎵 {playlist.tracks?.length ?? 0}곡</div>
               </Link>
@@ -40,7 +43,9 @@ export function RankingPage() {
               <div className="h5 mb-0" style={{ width: 40 }}>
                 {index + 4}
               </div>
-              <div className="album-art">{playlist.coverImageUrl ? <img src={playlist.coverImageUrl} alt="" /> : null}</div>
+              <div className="album-art">
+                <PlaylistCoverImage src={playlist.coverImageUrl} />
+              </div>
               <div className="flex-grow-1 min-w-0">
                 <div className="fw-bold text-truncate">{playlist.title}</div>
                 <div className="small text-secondary">♥ {playlist.likeCount ?? 0} · 🎵 {playlist.tracks?.length ?? 0}곡</div>

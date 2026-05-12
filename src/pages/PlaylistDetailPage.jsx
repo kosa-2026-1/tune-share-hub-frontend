@@ -26,6 +26,7 @@ import {
 } from '../api/playlistApi.js'
 import { applyLikeResponseToPlaylist } from '../api/normalizers.js'
 import { Pager } from '../components/Pager.jsx'
+import { PlaylistCoverImage } from '../components/PlaylistCoverImage.jsx'
 import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
 import { TrackRow } from '../components/TrackRow.jsx'
 import { useAsync } from '../hooks/useAsync.js'
@@ -201,7 +202,9 @@ export function PlaylistDetailPage() {
         <div className="row g-4 playlist-detail-layout">
           <aside className="col-lg-4 col-xl-3">
             <div className="surface p-4 playlist-info-panel">
-              <div className="thumb mb-3">{playlist.coverImageUrl ? <img src={playlist.coverImageUrl} alt="" /> : null}</div>
+              <div className="thumb mb-3">
+                <PlaylistCoverImage src={playlist.coverImageUrl} />
+              </div>
               <h1 className="h4 fw-bold">{playlist.title}</h1>
               <p className="text-secondary">{playlist.description || '설명이 없습니다.'}</p>
               <p className="small text-secondary">
