@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Team pre-push checks: branch naming, lint, test, build, and Docker smoke test.
+
+set -u
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+BRANCH_PATTERN='^(feat|fix|build|chore|docs|style|refactor|test|release)/[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
+
+if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "develop" ]; then
+  if ! printf '%s\n' "$BRANCH" | grep -Eq "$BRANCH_PATTERN"; then
+    echo "Invalid branch name: $BRANCH" >&2
+    echo "Expected: feat/1-swagger-api-docs" >&2
+    exit 1
+  fi
+fi
+
+if [ -f .env ]; then
+  if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+    echo ".env is tracked by git. Remove secrets from git before pushing." >&2
+    exit 1
+  fi
+fi
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+"$ROOT/scripts/quality-gate.sh" || exit 1
+
+exit 0

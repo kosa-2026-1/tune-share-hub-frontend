@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Enforce team commit message format:
+#   feat: #14 message
+
+set -u
+
+MSG_FILE="${1:-}"
+
+if [ -z "$MSG_FILE" ] || [ ! -f "$MSG_FILE" ]; then
+  echo "commit-msg hook: commit message file not found" >&2
+  exit 1
+fi
+
+FIRST_LINE=$(sed -n '1p' "$MSG_FILE")
+PATTERN='^(feat|fix|build|chore|docs|style|refactor|test|release): #[0-9]+ .+'
+
+if ! printf '%s\n' "$FIRST_LINE" | grep -Eq "$PATTERN"; then
+  cat >&2 <<'EOF'
+Invalid commit message.
+
+Expected:
+  feat: #14 커밋메시지
+
+Allowed types:
+  feat, fix, build, chore, docs, style, refactor, test, release
+EOF
+  exit 1
+fi
+
+exit 0

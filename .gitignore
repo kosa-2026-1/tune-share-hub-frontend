@@ -22,6 +22,10 @@ dist-ssr/
 *.log
 npm-debug.log*
 
+# Python cache
+__pycache__/
+*.py[cod]
+
 # OS
 .DS_Store
 Thumbs.db
