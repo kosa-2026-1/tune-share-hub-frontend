@@ -6,7 +6,22 @@ export function formatDuration(durationMs) {
   return `${minutes}:${seconds}`
 }
 
+export function formatDateTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
 export function getTrackCount(playlist) {
+  if (playlist?.trackCount != null) return Number(playlist.trackCount)
   return Array.isArray(playlist?.tracks) ? playlist.tracks.length : 0
 }
 
@@ -19,7 +34,7 @@ export function toPlaylistRequest(form) {
     title: form.title.trim(),
     description: form.description.trim(),
     cover_image_url: form.coverImageUrl.trim(),
-    public_yn: form.publicYn,
+    publicYn: form.publicYn,
   }
 }
 

@@ -343,6 +343,30 @@ a {
   background: var(--tsh-border);
 }
 
+.comment-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  align-self: flex-start;
+}
+
+.comment-action-button,
+.comment-icon-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  white-space: nowrap;
+}
+
+.comment-icon-button {
+  width: 32px;
+  padding: 0;
+}
+
 .share-copy-notice {
   position: absolute;
   left: 0;
@@ -424,6 +448,26 @@ a {
   opacity: 0.78;
 }
 
+.existing-track-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--tsh-border-soft);
+  border-radius: 10px;
+  background: var(--tsh-bg-alt);
+}
+
+.existing-track-list {
+  max-height: 220px;
+  padding-right: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tsh-border) transparent;
+}
+
 .selected-track-list {
   max-height: calc(100vh - 360px);
   min-height: 44px;
@@ -434,11 +478,13 @@ a {
   scrollbar-color: var(--tsh-border) transparent;
 }
 
-.selected-track-list::-webkit-scrollbar {
+.selected-track-list::-webkit-scrollbar,
+.existing-track-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.selected-track-list::-webkit-scrollbar-thumb {
+.selected-track-list::-webkit-scrollbar-thumb,
+.existing-track-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: var(--tsh-border);
 }

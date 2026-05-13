@@ -22,6 +22,7 @@ import {
   removeTrackFromPlaylist,
   reorderPlaylistTracks,
   togglePlaylistLike,
+  updatePlaylistComment,
   updatePlaylistVisibility,
 } from '../api/playlistApi.js'
 import { applyLikeResponseToPlaylist } from '../api/normalizers.js'
@@ -31,7 +32,7 @@ import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
 import { TrackRow } from '../components/TrackRow.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { useAuth } from '../stores/AuthContext.jsx'
-import { getTrackCount, isPublicPlaylist, paginate } from '../utils/format.js'
+import { formatDateTime, getTrackCount, isPublicPlaylist, paginate } from '../utils/format.js'
 import { isOwnedPlaylist } from '../utils/ownership.js'
 import { getPlayableTracks } from '../utils/youtube.js'
 
@@ -50,11 +51,14 @@ export function PlaylistDetailPage() {
   const [reorderDirty, setReorderDirty] = useState(false)
   const [reorderSaving, setReorderSaving] = useState(false)
   const [likeSaving, setLikeSaving] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingComment, setEditingComment] = useState('')
+  const [commentSaving, setCommentSaving] = useState(false)
   const shareNoticeTimerRef = useRef(null)
   const { data, loading, error, execute, setData } = useAsync(async () => {
     const [playlist, myPlaylists] = await Promise.all([
-      getPlaylistDetail(id, userId),
-      getMyPlaylists(userId).catch(() => []),
+      getPlaylistDetail(id),
+      getMyPlaylists().catch(() => []),
     ])
     return {
       playlist,
@@ -73,7 +77,7 @@ export function PlaylistDetailPage() {
     () => (trackSort === 'position' ? trackSource : sortTracks(trackSource, trackSort)),
     [trackSource, trackSort],
   )
-  const comments = useMemo(() => playlist?.comments || [], [playlist])
+  const comments = useMemo(() => sortCommentsByNewest(playlist?.comments || []), [playlist])
   const pagedComments = useMemo(
     () => paginate(comments, commentPage, COMMENT_PAGE_SIZE),
     [comments, commentPage],
@@ -92,14 +96,14 @@ export function PlaylistDetailPage() {
 
   async function handleDeletePlaylist() {
     if (!window.confirm('플레이리스트를 삭제할까요?')) return
-    await deletePlaylist(id, userId)
+    await deletePlaylist(id)
     navigate('/library')
   }
 
   async function handleLikePlaylist() {
     setLikeSaving(true)
     try {
-      const likeResponse = await togglePlaylistLike(id, userId)
+      const likeResponse = await togglePlaylistLike(id)
       setData((prev) => ({
         ...prev,
         playlist: applyLikeResponseToPlaylist(prev?.playlist, likeResponse),
@@ -162,7 +166,6 @@ export function PlaylistDetailPage() {
       await refreshFrom(() =>
         reorderPlaylistTracks(
           id,
-          userId,
           localTracks.map((track, index) => ({
             playlistTrackId: track.playlistTrackId,
             positionNo: index + 1,
@@ -181,6 +184,29 @@ export function PlaylistDetailPage() {
     if (!comment.trim()) return
     await refreshFrom(() => createPlaylistComment(id, { content: comment.trim() }))
     setComment('')
+    setCommentPage(1)
+  }
+
+  function startEditComment(item) {
+    setEditingCommentId(item.commentId)
+    setEditingComment(item.content || '')
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null)
+    setEditingComment('')
+  }
+
+  async function submitEditComment(event, commentId) {
+    event.preventDefault()
+    if (!editingComment.trim()) return
+    setCommentSaving(true)
+    try {
+      await refreshFrom(() => updatePlaylistComment(id, commentId, { content: editingComment.trim() }))
+      cancelEditComment()
+    } finally {
+      setCommentSaving(false)
+    }
   }
 
   if (loading) {
@@ -194,6 +220,7 @@ export function PlaylistDetailPage() {
   if (!playlist) return null
 
   const publicPlaylist = isPublicPlaylist(playlist)
+  const likedPlaylist = isLikedPlaylist(playlist)
   const canReorder = isOwner && trackSort === 'position' && localTracks.length > 1
 
   return (
@@ -210,14 +237,23 @@ export function PlaylistDetailPage() {
               <p className="small text-secondary">
                 ♥ {playlist.likeCount ?? 0} · 🎵 {getTrackCount(playlist)}곡 · {publicPlaylist ? '공개' : '비공개'}
               </p>
+              {playlist.tags?.length ? (
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                  {playlist.tags.map((tag) => (
+                    <span className="tag-chip" key={tag}>#{tag}</span>
+                  ))}
+                </div>
+              ) : null}
               <div className="d-flex flex-wrap gap-2 position-relative">
                 <button
-                  className="btn btn-sm btn-accent"
+                  className={`btn btn-sm ${likedPlaylist ? 'btn-accent' : 'btn-outline-secondary'}`}
                   type="button"
                   onClick={handleLikePlaylist}
                   disabled={likeSaving}
+                  aria-pressed={likedPlaylist}
                 >
-                  <Heart size={15} /> {likeSaving ? '처리 중' : '좋아요'}
+                  <Heart size={15} fill={likedPlaylist ? 'currentColor' : 'none'} />
+                  {likeSaving ? '처리 중' : likedPlaylist ? '좋아요 취소' : '좋아요'}
                 </button>
                 <button
                   className="btn btn-sm btn-outline-secondary"
@@ -238,12 +274,7 @@ export function PlaylistDetailPage() {
                       type="button"
                       onClick={() =>
                         refreshFrom(() =>
-                          updatePlaylistVisibility(id, userId, {
-                            title: playlist.title,
-                            description: playlist.description || '',
-                            cover_image_url: playlist.coverImageUrl || '',
-                            public_yn: publicPlaylist ? 'N' : 'Y',
-                          }),
+                          updatePlaylistVisibility(id, publicPlaylist ? 'N' : 'Y'),
                         )
                       }
                     >
@@ -252,8 +283,14 @@ export function PlaylistDetailPage() {
                     <Link className="btn btn-sm btn-outline-secondary" to={`/playlists/${id}/edit`}>
                       <Edit3 size={15} /> 수정
                     </Link>
-                    <button className="btn btn-sm btn-outline-danger" type="button" onClick={handleDeletePlaylist}>
-                      <Trash2 size={15} /> 삭제
+                    <button
+                      className="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center"
+                      type="button"
+                      onClick={handleDeletePlaylist}
+                      aria-label="플레이리스트 삭제"
+                      title="플레이리스트 삭제"
+                    >
+                      <Trash2 size={15} />
                     </button>
                   </>
                 ) : null}
@@ -350,7 +387,7 @@ export function PlaylistDetailPage() {
                       className="btn btn-sm btn-outline-danger track-delete-button"
                       aria-label="트랙 삭제"
                       onClick={() =>
-                        refreshFrom(() => removeTrackFromPlaylist(id, userId, track.playlistTrackId))
+                        refreshFrom(() => removeTrackFromPlaylist(id, track.playlistTrackId))
                       }
                     >
                       <Trash2 size={15} />
@@ -376,19 +413,64 @@ export function PlaylistDetailPage() {
               <div className="d-grid gap-2">
                 {pagedComments.items.map((item) => (
                   <article className="comment-item p-3" key={item.commentId}>
-                    <div className="d-flex justify-content-between gap-3">
-                      <div>
-                        <strong>{item.userNickname || `user-${item.userId}`}</strong>
-                        <p className="mb-0">{item.content}</p>
+                    <div className="d-flex justify-content-between gap-3 align-items-start">
+                      <div className="min-w-0 flex-grow-1">
+                        <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
+                          <strong>{item.userNickname || `user-${item.userId}`}</strong>
+                          <span className="small text-secondary">{getCommentDateLabel(item)}</span>
+                        </div>
+                        {editingCommentId === item.commentId ? (
+                          <form
+                            className="d-flex flex-nowrap gap-2"
+                            onSubmit={(event) => submitEditComment(event, item.commentId)}
+                          >
+                            <input
+                              className="form-control form-control-sm min-w-0"
+                              value={editingComment}
+                              onChange={(event) => setEditingComment(event.target.value)}
+                              aria-label="댓글 수정 내용"
+                            />
+                            <button
+                              type="submit"
+                              className="btn btn-sm btn-accent flex-shrink-0"
+                              disabled={commentSaving || !editingComment.trim()}
+                            >
+                              저장
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-secondary flex-shrink-0"
+                              onClick={cancelEditComment}
+                              disabled={commentSaving}
+                            >
+                              취소
+                            </button>
+                          </form>
+                        ) : (
+                          <p className="mb-0">{item.content}</p>
+                        )}
                       </div>
-                      {item.userId === userId ? (
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-link text-danger"
-                          onClick={() => refreshFrom(() => deletePlaylistComment(id, item.commentId))}
-                        >
-                          삭제
-                        </button>
+                      {isMyComment(item, userId) ? (
+                        <div className="comment-actions">
+                          {editingCommentId === item.commentId ? null : (
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-secondary comment-action-button"
+                              onClick={() => startEditComment(item)}
+                            >
+                              <Edit3 size={15} /> 수정
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger comment-icon-button"
+                            aria-label="댓글 삭제"
+                            title="댓글 삭제"
+                            onClick={() => refreshFrom(() => deletePlaylistComment(id, item.commentId))}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       ) : null}
                     </div>
                   </article>
@@ -427,4 +509,27 @@ function shuffleTracks(tracks) {
 
 function getTrackKey(track) {
   return String(track.playlistTrackId || track.trackId)
+}
+
+function isLikedPlaylist(playlist) {
+  if (typeof playlist?.liked === 'boolean') return playlist.liked
+  return ['Y', 'TRUE', 'LIKED'].includes(String(playlist?.liked || playlist?.likeStatus || '').toUpperCase())
+}
+
+function isMyComment(comment, userId) {
+  return String(comment?.userId) === String(userId)
+}
+
+function getCommentDateLabel(comment) {
+  const createdAt = formatDateTime(comment?.createdAt)
+  return createdAt ? `작성일 ${createdAt}` : ''
+}
+
+function sortCommentsByNewest(comments) {
+  return [...comments].sort((a, b) => getCommentTime(b) - getCommentTime(a))
+}
+
+function getCommentTime(comment) {
+  const time = new Date(comment?.createdAt || 0).getTime()
+  return Number.isNaN(time) ? 0 : time
 }
