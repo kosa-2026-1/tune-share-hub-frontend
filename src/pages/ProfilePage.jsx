@@ -8,7 +8,7 @@ import { useAuth } from '../stores/AuthContext.jsx'
 export function ProfilePage() {
   const { user, userId, logout } = useAuth()
   const navigate = useNavigate()
-  const { data, loading, error, execute } = useAsync(() => getUserInfo(userId), [userId])
+  const { data, loading, error, execute } = useAsync(() => getUserInfo(), [userId])
   const profile = data || user
 
   async function handleLogout() {

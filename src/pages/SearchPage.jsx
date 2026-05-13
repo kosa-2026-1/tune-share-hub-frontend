@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { searchMusic } from '../api/musicApi.js'
@@ -9,13 +10,11 @@ import {
 import { Pager } from '../components/Pager.jsx'
 import { EmptyView, ErrorView } from '../components/StatusView.jsx'
 import { TrackRow } from '../components/TrackRow.jsx'
-import { useAuth } from '../stores/AuthContext.jsx'
 import { paginate } from '../utils/format.js'
 
 const RESULT_PAGE_SIZE = 6
 
 export function SearchPage() {
-  const { userId } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialKeyword = searchParams.get('keyword') || ''
   const [keyword, setKeyword] = useState(initialKeyword)
@@ -28,8 +27,8 @@ export function SearchPage() {
   const pagedTracks = useMemo(() => paginate(tracks, page, RESULT_PAGE_SIZE), [tracks, page])
 
   useEffect(() => {
-    getSearchHistory(userId).then(setHistory).catch(() => setHistory([]))
-  }, [userId])
+    getSearchHistory().then(setHistory).catch(() => setHistory([]))
+  }, [])
 
   useEffect(() => {
     if (initialKeyword) {
@@ -49,8 +48,8 @@ export function SearchPage() {
       setTracks(result || [])
       setKeyword(trimmedKeyword)
       setSearchParams({ keyword: trimmedKeyword })
-      await saveSearchHistory(userId, trimmedKeyword).catch(() => {})
-      setHistory(await getSearchHistory(userId).catch(() => history))
+      await saveSearchHistory(trimmedKeyword).catch(() => {})
+      setHistory(await getSearchHistory().catch(() => history))
     } catch (caughtError) {
       setError(caughtError)
     } finally {
@@ -59,7 +58,7 @@ export function SearchPage() {
   }
 
   async function removeHistory(historyId) {
-    await deleteSearchHistory(userId, historyId)
+    await deleteSearchHistory(historyId)
     setHistory((items) => items.filter((item) => item.historyId !== historyId))
   }
 
@@ -67,19 +66,19 @@ export function SearchPage() {
     <main className="page-section">
       <div className="container-xxl">
         <form
-          className="surface d-flex flex-column flex-md-row gap-2 p-3 mb-4"
+          className="surface d-flex flex-nowrap gap-2 p-3 mb-4"
           onSubmit={(event) => {
             event.preventDefault()
             runSearch()
           }}
         >
           <input
-            className="form-control form-control-lg"
+            className="form-control form-control-lg min-w-0"
             placeholder="아티스트, 곡, 플레이리스트 검색"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
           />
-          <button type="submit" className="btn btn-accent px-4" disabled={loading}>
+          <button type="submit" className="btn btn-accent px-4 flex-shrink-0" disabled={loading}>
             검색
           </button>
         </form>
@@ -95,13 +94,14 @@ export function SearchPage() {
             >
               {item.keyword}
               <span
-                className="ms-2"
+                className="ms-2 d-inline-flex align-items-center"
+                aria-label={`${item.keyword} 검색 기록 삭제`}
                 onClick={(event) => {
                   event.stopPropagation()
                   removeHistory(item.historyId)
                 }}
               >
-                ×
+                <Trash2 size={13} />
               </span>
             </button>
           ))}

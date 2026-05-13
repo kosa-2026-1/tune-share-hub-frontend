@@ -74,7 +74,7 @@ export function AuthProvider({ children }) {
       async logout() {
         try {
           if (user?.userId) {
-            await logoutRequest(user.userId)
+            await logoutRequest()
           }
         } finally {
           clearAccessToken()

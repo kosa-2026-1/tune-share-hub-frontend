@@ -33,7 +33,7 @@ export function PlaylistFormPage() {
   useEffect(() => {
     if (!editing) return
     setCheckingOwner(true)
-    Promise.all([getPlaylistDetail(id, userId), getMyPlaylists(userId).catch(() => [])])
+    Promise.all([getPlaylistDetail(id), getMyPlaylists().catch(() => [])])
       .then(([playlist, myPlaylists]) => {
         const owned = isOwnedPlaylist(playlist, userId, myPlaylists)
         const myPlaylist = myPlaylists.find((item) => String(item.playlistId) === String(id))
@@ -109,8 +109,8 @@ export function PlaylistFormPage() {
     try {
       const payload = toPlaylistFormData(form)
       const playlist = editing
-        ? await updatePlaylist(id, userId, payload)
-        : await createPlaylist(userId, payload)
+        ? await updatePlaylist(id, payload)
+        : await createPlaylist(payload)
       const playlistId = playlist?.playlistId || id
       navigate(editing ? `/playlists/${playlistId}` : `/playlists/${playlistId}/add-tracks`)
     } catch (caughtError) {

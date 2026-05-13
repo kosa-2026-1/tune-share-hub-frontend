@@ -17,7 +17,7 @@ export function MyLibraryPage() {
   const [tab, setTab] = useState('mine')
   const [page, setPage] = useState(1)
   const { data, loading, error, execute } = useAsync(async () => {
-    const [mine, liked] = await Promise.all([getMyPlaylists(userId), getLikedPlaylists(userId)])
+    const [mine, liked] = await Promise.all([getMyPlaylists(), getLikedPlaylists()])
     return { mine: mine || [], liked: liked || [] }
   }, [userId])
 
