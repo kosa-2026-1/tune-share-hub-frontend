@@ -85,7 +85,7 @@ export function PlayerPage() {
               <h1 className="h4 fw-bold">{currentTrack.title}</h1>
               <p className="text-secondary mb-3">{currentTrack.artistName}</p>
               {currentTrack.albumImageUrl ? (
-                <div className="thumb">
+                <div className="thumb player-cover">
                   <img src={currentTrack.albumImageUrl} alt="" />
                 </div>
               ) : null}
