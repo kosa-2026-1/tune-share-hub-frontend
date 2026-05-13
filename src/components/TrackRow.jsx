@@ -3,7 +3,15 @@ import { Link } from 'react-router-dom'
 import { formatDuration } from '../utils/format.js'
 import { canShowYoutubeEmbed } from '../utils/youtube.js'
 
-export function TrackRow({ track, index, playerState, onAdd, added, actionLabel = '추가' }) {
+export function TrackRow({
+  track,
+  index,
+  playerState,
+  onAdd,
+  added,
+  actionLabel = '추가',
+  addedLabel = '추가됨',
+}) {
   const canPlay = canShowYoutubeEmbed(track.youtubeUrl)
 
   return (
@@ -58,7 +66,7 @@ export function TrackRow({ track, index, playerState, onAdd, added, actionLabel 
             onClick={() => onAdd(track)}
           >
             <ListPlus size={15} />
-            {added ? '추가됨' : actionLabel}
+            {added ? addedLabel : actionLabel}
           </button>
         ) : null}
       </div>
