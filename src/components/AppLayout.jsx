@@ -24,8 +24,9 @@ export function AppLayout() {
     const formData = new FormData(event.currentTarget)
     const keyword = formData.get('keyword')?.toString().trim()
     if (keyword) {
-      navigate(`/search?keyword=${encodeURIComponent(keyword)}`)
+      navigate(`/playlists?keyword=${encodeURIComponent(keyword)}`)
       setOpen(false)
+      event.currentTarget.reset()
     }
   }
 
@@ -41,7 +42,7 @@ export function AppLayout() {
             <input
               className="form-control form-control-sm border-0 bg-transparent shadow-none"
               name="keyword"
-              placeholder="아티스트, 곡, 플레이리스트"
+              placeholder="플레이리스트 검색"
             />
           </form>
           <button
@@ -97,7 +98,7 @@ export function AppLayout() {
               <input
                 className="form-control form-control-sm border-0 bg-transparent shadow-none"
                 name="keyword"
-                placeholder="아티스트, 곡, 플레이리스트"
+                placeholder="플레이리스트 검색"
               />
             </form>
           </div>
