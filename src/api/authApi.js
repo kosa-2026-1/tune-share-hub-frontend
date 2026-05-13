@@ -9,11 +9,10 @@ export async function login(credentials) {
   }
 }
 
-export async function logout(userId) {
+export async function logout() {
   return request({
     method: 'post',
     url: '/api/auth/logout',
-    params: { userId },
   })
 }
 

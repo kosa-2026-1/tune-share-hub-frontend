@@ -72,6 +72,11 @@ describe('applyLikeResponseToPlaylist', () => {
 
     expect(applyLikeResponseToPlaylist(playlist, null)).toBe(playlist)
   })
+
+  it('accepts Y/N style like status values', () => {
+    expect(applyLikeResponseToPlaylist({ playlistId: 1 }, { status: 'Y' }).liked).toBe(true)
+    expect(applyLikeResponseToPlaylist({ playlistId: 1 }, { status: 'N' }).liked).toBe(false)
+  })
 })
 
 describe('toPlaylistFormData', () => {
@@ -87,7 +92,7 @@ describe('toPlaylistFormData', () => {
 
     expect(formData.get('title')).toBe('제목')
     expect(formData.get('description')).toBe('설명')
-    expect(formData.get('public_yn')).toBe('N')
+    expect(formData.get('publicYn')).toBe('N')
     expect(formData.getAll('tags')).toEqual(['rock', 'k-pop'])
     expect(formData.get('coverImage')).toBe(file)
   })

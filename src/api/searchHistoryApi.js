@@ -1,22 +1,23 @@
 import { request } from './client.js'
 
-export async function getSearchHistory(userId) {
-  return request({ method: 'get', url: '/api/search/history', params: { userId } })
+export async function getSearchHistory() {
+  return request({ method: 'get', url: '/api/search/history' })
 }
 
-export async function saveSearchHistory(userId, keyword) {
+export async function saveSearchHistory(userIdOrKeyword, maybeKeyword) {
+  const keyword = maybeKeyword ?? userIdOrKeyword
   return request({
     method: 'post',
     url: '/api/search/history',
-    params: { userId },
     data: { keyword },
   })
 }
 
-export async function deleteSearchHistory(userId, historyId) {
+export async function deleteSearchHistory(userIdOrHistoryId, maybeHistoryId) {
+  const historyId = maybeHistoryId ?? userIdOrHistoryId
   return request({
     method: 'delete',
     url: '/api/search/history',
-    params: { userId, historyId },
+    params: { historyId },
   })
 }

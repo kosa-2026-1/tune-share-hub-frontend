@@ -1,9 +1,9 @@
 import { request } from './client.js'
 
-export async function getUserInfo(userId) {
-  return request({ method: 'get', url: '/api/user/me', params: { userId } })
+export async function getUserInfo() {
+  return request({ method: 'get', url: '/api/user/me' })
 }
 
-export async function getLikedPlaylists(userId) {
-  return request({ method: 'get', url: '/api/user/me/likes', params: { userId } })
+export async function getLikedPlaylists() {
+  return request({ method: 'get', url: '/api/user/me/likes' })
 }

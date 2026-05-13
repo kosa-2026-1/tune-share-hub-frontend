@@ -57,7 +57,7 @@ export function toPlaylistFormData(form) {
   const formData = new FormData()
   formData.append('title', form.title.trim())
   formData.append('description', form.description.trim())
-  formData.append('public_yn', form.publicYn)
+  formData.append('publicYn', form.publicYn)
 
   normalizeTags(form.tags).forEach((tag) => {
     formData.append('tags', tag)
@@ -76,7 +76,7 @@ export function applyLikeResponseToPlaylist(playlist, likeResponse) {
   return {
     ...playlist,
     likeCount: Number(likeResponse.totalLikeCount ?? playlist.likeCount ?? 0),
-    liked: likeResponse.status === 'LIKED',
+    liked: isLikedStatus(likeResponse.status ?? likeResponse.liked),
     likeStatus: likeResponse.status,
   }
 }
@@ -86,4 +86,9 @@ function normalizeTags(tags) {
     .map((tag) => String(tag).trim())
     .filter(Boolean)
     .slice(0, 5)
+}
+
+function isLikedStatus(status) {
+  if (typeof status === 'boolean') return status
+  return ['LIKED', 'Y', 'TRUE'].includes(String(status || '').toUpperCase())
 }

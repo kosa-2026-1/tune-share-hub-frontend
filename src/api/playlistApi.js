@@ -10,77 +10,74 @@ export async function getPublicPlaylists({ page = 1, size = 8 } = {}) {
   return normalizePlaylistPage(data)
 }
 
-export async function getPlaylistRanking(limit = 10) {
-  return request({ method: 'get', url: '/api/playlists/ranking', params: { limit } })
+export async function getPlaylistRanking(limit = 10, type = 'like') {
+  return request({ method: 'get', url: '/api/playlists/ranking', params: { limit, type } })
 }
 
-export async function getMyPlaylists(userId) {
-  return request({ method: 'get', url: '/api/users/me/playlists', params: { userId } })
+export async function getMyPlaylists() {
+  return request({ method: 'get', url: '/api/users/me/playlists' })
 }
 
-export async function getPlaylistDetail(id, userId) {
-  return request({ method: 'get', url: `/api/playlists/${id}`, params: { userId } })
+export async function getPlaylistDetail(id) {
+  return request({ method: 'get', url: `/api/playlists/${id}` })
 }
 
-export async function createPlaylist(userId, payload) {
+export async function createPlaylist(userIdOrPayload, maybePayload) {
   return request({
     method: 'post',
     url: '/api/playlists',
-    params: { userId },
-    data: payload,
+    data: maybePayload ?? userIdOrPayload,
   })
 }
 
-export async function updatePlaylist(id, userId, payload) {
+export async function updatePlaylist(id, userIdOrPayload, maybePayload) {
   return request({
     method: 'put',
     url: `/api/playlists/${id}`,
-    params: { userId },
-    data: payload,
+    data: maybePayload ?? userIdOrPayload,
   })
 }
 
-export async function deletePlaylist(id, userId) {
-  return request({ method: 'delete', url: `/api/playlists/${id}`, params: { userId } })
+export async function deletePlaylist(id) {
+  return request({ method: 'delete', url: `/api/playlists/${id}` })
 }
 
-export async function updatePlaylistVisibility(id, userId, payload) {
+export async function updatePlaylistVisibility(id, userIdOrPayload, maybePayload) {
+  const payload = maybePayload ?? userIdOrPayload
+  const publicYn = typeof payload === 'string' ? payload : payload?.publicYn || payload?.public_yn
   return request({
     method: 'patch',
     url: `/api/playlists/${id}/visibility`,
-    params: { userId },
-    data: payload,
+    params: { publicYn },
   })
 }
 
-export async function addTracksToPlaylist(id, userId, tracks) {
+export async function addTracksToPlaylist(id, userIdOrTracks, maybeTracks) {
   return request({
     method: 'post',
     url: `/api/playlists/${id}/tracks`,
-    params: { userId },
-    data: tracks,
+    data: maybeTracks ?? userIdOrTracks,
   })
 }
 
-export async function removeTrackFromPlaylist(id, userId, trackId) {
+export async function removeTrackFromPlaylist(id, userIdOrTrackId, maybeTrackId) {
+  const trackId = maybeTrackId ?? userIdOrTrackId
   return request({
     method: 'delete',
     url: `/api/playlists/${id}/tracks/${trackId}`,
-    params: { userId },
   })
 }
 
-export async function reorderPlaylistTracks(id, userId, tracks) {
+export async function reorderPlaylistTracks(id, userIdOrTracks, maybeTracks) {
   return request({
     method: 'patch',
     url: `/api/playlists/${id}/tracks/reorder`,
-    params: { userId },
-    data: tracks,
+    data: maybeTracks ?? userIdOrTracks,
   })
 }
 
-export async function togglePlaylistLike(id, userId) {
-  return request({ method: 'post', url: `/api/playlists/${id}/likes`, params: { userId } })
+export async function togglePlaylistLike(id) {
+  return request({ method: 'post', url: `/api/playlists/${id}/likes` })
 }
 
 export async function createPlaylistComment(id, payload) {
