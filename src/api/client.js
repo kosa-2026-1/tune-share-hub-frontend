@@ -47,6 +47,11 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
+
+    if (originalRequest?.url?.includes('/api/auth/reissue')) {
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true
       try {

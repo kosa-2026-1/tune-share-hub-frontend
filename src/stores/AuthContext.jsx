@@ -42,6 +42,8 @@ export function AuthProvider({ children }) {
         }
       } catch {
         clearAccessToken()
+        setUser(null)
+        storeUser(null)
       } finally {
         if (mounted) {
           setBootstrapping(false)
