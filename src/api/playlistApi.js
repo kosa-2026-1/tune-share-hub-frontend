@@ -42,6 +42,10 @@ export async function deletePlaylist(id) {
   return request({ method: 'delete', url: `/api/playlists/${id}` })
 }
 
+export async function copyPlaylist(id) {
+  return request({ method: 'post', url: `/api/playlists/${id}/copy` })
+}
+
 export async function updatePlaylistVisibility(id, userIdOrPayload, maybePayload) {
   const payload = maybePayload ?? userIdOrPayload
   const publicYn = typeof payload === 'string' ? payload : payload?.publicYn || payload?.public_yn

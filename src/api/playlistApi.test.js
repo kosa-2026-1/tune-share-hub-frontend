@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { request } from './client.js'
 import {
   addTracksToPlaylist,
+  copyPlaylist,
   deletePlaylist,
   getMyPlaylists,
   getPlaylistDetail,
@@ -26,6 +27,7 @@ describe('playlistApi', () => {
     await getPlaylistDetail(10)
     await deletePlaylist(10)
     await togglePlaylistLike(10)
+    await copyPlaylist(10)
 
     expect(request).toHaveBeenNthCalledWith(1, {
       method: 'get',
@@ -42,6 +44,10 @@ describe('playlistApi', () => {
     expect(request).toHaveBeenNthCalledWith(4, {
       method: 'post',
       url: '/api/playlists/10/likes',
+    })
+    expect(request).toHaveBeenNthCalledWith(5, {
+      method: 'post',
+      url: '/api/playlists/10/copy',
     })
   })
 

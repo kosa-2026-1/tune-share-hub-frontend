@@ -1,5 +1,6 @@
 import {
   ArrowUpDown,
+  Copy,
   Edit3,
   GripVertical,
   Heart,
@@ -14,6 +15,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
+  copyPlaylist,
   createPlaylistComment,
   deletePlaylist,
   deletePlaylistComment,
@@ -51,6 +53,8 @@ export function PlaylistDetailPage() {
   const [reorderDirty, setReorderDirty] = useState(false)
   const [reorderSaving, setReorderSaving] = useState(false)
   const [likeSaving, setLikeSaving] = useState(false)
+  const [copySaving, setCopySaving] = useState(false)
+  const [copyError, setCopyError] = useState(null)
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingComment, setEditingComment] = useState('')
   const [commentSaving, setCommentSaving] = useState(false)
@@ -110,6 +114,24 @@ export function PlaylistDetailPage() {
       }))
     } finally {
       setLikeSaving(false)
+    }
+  }
+
+  async function handleCopyPlaylist() {
+    setCopySaving(true)
+    setCopyError(null)
+    try {
+      const copiedPlaylist = await copyPlaylist(id)
+      const copiedPlaylistId = copiedPlaylist?.playlistId || copiedPlaylist?.id
+      if (copiedPlaylistId) {
+        navigate(`/playlists/${copiedPlaylistId}`)
+        return
+      }
+      await execute()
+    } catch (caughtError) {
+      setCopyError(caughtError)
+    } finally {
+      setCopySaving(false)
     }
   }
 
@@ -262,6 +284,16 @@ export function PlaylistDetailPage() {
                 >
                   <LinkIcon size={15} /> 공유
                 </button>
+                {publicPlaylist ? (
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    type="button"
+                    onClick={handleCopyPlaylist}
+                    disabled={copySaving}
+                  >
+                    <Copy size={15} /> {copySaving ? '복사 중' : '복사'}
+                  </button>
+                ) : null}
                 {shareCopied ? (
                   <span className="share-copy-notice" role="status">
                     링크가 복사되었습니다.
@@ -295,6 +327,11 @@ export function PlaylistDetailPage() {
                   </>
                 ) : null}
               </div>
+              {copyError ? (
+                <div className="alert alert-danger py-2 px-3 small mt-3 mb-0">
+                  {copyError.message || '플레이리스트를 복사하지 못했습니다.'}
+                </div>
+              ) : null}
             </div>
           </aside>
           <section className="col-lg-8 col-xl-9">
