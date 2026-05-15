@@ -7,12 +7,18 @@ export async function getPublicPlaylists({ page = 1, size = 8, keyword } = {}) {
     method: 'get',
     url: '/api/playlists',
     params: trimmedKeyword ? { page, size, keyword: trimmedKeyword } : { page, size },
+    skipAuth: true,
   })
   return normalizePlaylistPage(data)
 }
 
 export async function getPlaylistRanking(limit = 10, type = 'like') {
-  return request({ method: 'get', url: '/api/playlists/ranking', params: { limit, type } })
+  return request({
+    method: 'get',
+    url: '/api/playlists/ranking',
+    params: { limit, type },
+    skipAuth: true,
+  })
 }
 
 export async function getMyPlaylists() {

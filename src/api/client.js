@@ -10,6 +10,10 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
+  if (config.skipAuth) {
+    return config
+  }
+
   const token = getAccessToken()
   if (token) {
     config.headers.Authorization = token
@@ -49,6 +53,10 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config
 
     if (originalRequest?.url?.includes('/api/auth/reissue')) {
+      return Promise.reject(error)
+    }
+
+    if (originalRequest?.skipAuth) {
       return Promise.reject(error)
     }
 
