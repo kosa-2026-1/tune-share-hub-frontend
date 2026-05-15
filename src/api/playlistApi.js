@@ -1,25 +1,18 @@
 import { request } from './client.js'
 import { normalizePlaylistPage } from './normalizers.js'
 
-export async function getPublicPlaylists({ page = 1, size = 8 } = {}) {
+export async function getPublicPlaylists({ page = 1, size = 8, keyword } = {}) {
+  const trimmedKeyword = keyword?.trim()
   const data = await request({
     method: 'get',
     url: '/api/playlists',
-    params: { page, size },
+    params: trimmedKeyword ? { page, size, keyword: trimmedKeyword } : { page, size },
   })
   return normalizePlaylistPage(data)
 }
 
 export async function getPlaylistRanking(limit = 10, type = 'like') {
   return request({ method: 'get', url: '/api/playlists/ranking', params: { limit, type } })
-}
-
-export async function searchPlaylists(keyword) {
-  return request({
-    method: 'get',
-    url: '/api/playlists/search',
-    params: { keyword: keyword.trim() },
-  })
 }
 
 export async function getMyPlaylists() {

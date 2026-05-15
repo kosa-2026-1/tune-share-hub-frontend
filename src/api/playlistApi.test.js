@@ -8,7 +8,6 @@ import {
   getPlaylistDetail,
   removeTrackFromPlaylist,
   reorderPlaylistTracks,
-  searchPlaylists,
   togglePlaylistLike,
   updatePlaylistVisibility,
 } from './playlistApi.js'
@@ -85,13 +84,15 @@ describe('playlistApi', () => {
     })
   })
 
-  it('searches public playlists by keyword', async () => {
-    await searchPlaylists(' 로맨틱 ')
+  it('requests public playlists with keyword pagination params', async () => {
+    const { getPublicPlaylists } = await import('./playlistApi.js')
+
+    await getPublicPlaylists({ page: 2, size: 8, keyword: ' 로맨틱 ' })
 
     expect(request).toHaveBeenCalledWith({
       method: 'get',
-      url: '/api/playlists/search',
-      params: { keyword: '로맨틱' },
+      url: '/api/playlists',
+      params: { page: 2, size: 8, keyword: '로맨틱' },
     })
   })
 })

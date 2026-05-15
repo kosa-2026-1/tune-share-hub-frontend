@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getPublicPlaylists, searchPlaylists } from '../api/playlistApi.js'
+import { getPublicPlaylists } from '../api/playlistApi.js'
 import { Pager } from '../components/Pager.jsx'
 import { PlaylistCard } from '../components/PlaylistCard.jsx'
 import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
@@ -15,20 +15,14 @@ export function PlaylistListPage() {
   const searchMode = Boolean(keyword)
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState('new')
-  const { data, loading, error, execute } = useAsync(async () => {
-    if (searchMode) {
-      const items = await searchPlaylists(keyword)
-      return {
-        items: Array.isArray(items) ? items : [],
-        page: 1,
-        size: Array.isArray(items) ? items.length : 0,
-        totalPages: 1,
-        totalElements: Array.isArray(items) ? items.length : 0,
-      }
-    }
+  const { data, loading, error, execute } = useAsync(
+    () => getPublicPlaylists({ page, size: PAGE_SIZE, keyword }),
+    [page, keyword],
+  )
 
-    return getPublicPlaylists({ page, size: PAGE_SIZE })
-  }, [page, keyword, searchMode])
+  useEffect(() => {
+    setPage(1)
+  }, [keyword])
 
   const playlists = [...(data?.items || [])].sort((a, b) => {
     if (sort === 'like') return (b.likeCount || 0) - (a.likeCount || 0)
