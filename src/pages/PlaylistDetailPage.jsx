@@ -34,7 +34,12 @@ import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
 import { TrackRow } from '../components/TrackRow.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { useAuth } from '../stores/AuthContext.jsx'
-import { formatDateTime, getTrackCount, isPublicPlaylist, paginate } from '../utils/format.js'
+import {
+  formatDateTime,
+  getTrackCount,
+  isPublicPlaylist,
+  paginate,
+} from '../utils/format.js'
 import { isOwnedPlaylist } from '../utils/ownership.js'
 import { getPlayableTracks } from '../utils/youtube.js'
 
@@ -68,17 +73,26 @@ export function PlaylistDetailPage() {
   const playlist = data?.playlist
   const tracks = useMemo(() => playlist?.tracks || [], [playlist])
   const trackSource = useMemo(
-    () => (localTracks.length || tracks.length === 0 ? localTracks : sortTracks(tracks, 'position')),
-    [localTracks, tracks],
+    () =>
+      localTracks.length || tracks.length === 0
+        ? localTracks
+        : sortTracks(tracks, 'position'),
+    [localTracks, tracks]
   )
   const sortedTracks = useMemo(
-    () => (trackSort === 'position' ? trackSource : sortTracks(trackSource, trackSort)),
-    [trackSource, trackSort],
+    () =>
+      trackSort === 'position'
+        ? trackSource
+        : sortTracks(trackSource, trackSort),
+    [trackSource, trackSort]
   )
-  const comments = useMemo(() => sortCommentsByNewest(playlist?.comments || []), [playlist])
+  const comments = useMemo(
+    () => sortCommentsByNewest(playlist?.comments || []),
+    [playlist]
+  )
   const pagedComments = useMemo(
     () => paginate(comments, commentPage, COMMENT_PAGE_SIZE),
-    [comments, commentPage],
+    [comments, commentPage]
   )
 
   async function refreshFrom(action) {
@@ -198,8 +212,12 @@ export function PlaylistDetailPage() {
     if (!draggedTrackKey || draggedTrackKey === targetTrackKey) return
 
     setLocalTracks((items) => {
-      const fromIndex = items.findIndex((item) => getTrackKey(item) === draggedTrackKey)
-      const toIndex = items.findIndex((item) => getTrackKey(item) === targetTrackKey)
+      const fromIndex = items.findIndex(
+        (item) => getTrackKey(item) === draggedTrackKey
+      )
+      const toIndex = items.findIndex(
+        (item) => getTrackKey(item) === targetTrackKey
+      )
       if (fromIndex < 0 || toIndex < 0) return items
 
       const nextItems = [...items]
@@ -219,8 +237,8 @@ export function PlaylistDetailPage() {
           localTracks.map((track, index) => ({
             playlistTrackId: track.playlistTrackId,
             positionNo: index + 1,
-          })),
-        ),
+          }))
+        )
       )
       setTrackSort('position')
       setReorderDirty(false)
@@ -232,7 +250,9 @@ export function PlaylistDetailPage() {
   async function submitComment(event) {
     event.preventDefault()
     if (!comment.trim()) return
-    await refreshFrom(() => createPlaylistComment(id, { content: comment.trim() }))
+    await refreshFrom(() =>
+      createPlaylistComment(id, { content: comment.trim() })
+    )
     setComment('')
     setCommentPage(1)
   }
@@ -252,7 +272,9 @@ export function PlaylistDetailPage() {
     if (!editingComment.trim()) return
     setCommentSaving(true)
     try {
-      await refreshFrom(() => updatePlaylistComment(id, commentId, { content: editingComment.trim() }))
+      await refreshFrom(() =>
+        updatePlaylistComment(id, commentId, { content: editingComment.trim() })
+      )
       cancelEditComment()
     } finally {
       setCommentSaving(false)
@@ -260,18 +282,27 @@ export function PlaylistDetailPage() {
   }
 
   if (loading) {
-    return <main className="page-section container-xxl"><LoadingView /></main>
+    return (
+      <main className="page-section container-xxl">
+        <LoadingView />
+      </main>
+    )
   }
 
   if (error) {
-    return <main className="page-section container-xxl"><ErrorView error={error} onRetry={execute} /></main>
+    return (
+      <main className="page-section container-xxl">
+        <ErrorView error={error} onRetry={execute} />
+      </main>
+    )
   }
 
   if (!playlist) return null
 
   const publicPlaylist = isPublicPlaylist(playlist)
   const likedPlaylist = isLikedPlaylist(playlist)
-  const canReorder = isOwner && trackSort === 'position' && localTracks.length > 1
+  const canReorder =
+    isOwner && trackSort === 'position' && localTracks.length > 1
 
   return (
     <main className="page-section">
@@ -283,14 +314,19 @@ export function PlaylistDetailPage() {
                 <PlaylistCoverImage src={playlist.coverImageUrl} />
               </div>
               <h1 className="h4 fw-bold">{playlist.title}</h1>
-              <p className="text-secondary">{playlist.description || '설명이 없습니다.'}</p>
+              <p className="text-secondary">
+                {playlist.description || '설명이 없습니다.'}
+              </p>
               <p className="small text-secondary">
-                ♥ {playlist.likeCount ?? 0} · 🎵 {getTrackCount(playlist)}곡 · {publicPlaylist ? '공개' : '비공개'}
+                ♥ {playlist.likeCount ?? 0} · 🎵 {getTrackCount(playlist)}곡 ·{' '}
+                {publicPlaylist ? '공개' : '비공개'}
               </p>
               {playlist.tags?.length ? (
                 <div className="d-flex flex-wrap gap-2 mb-3">
                   {playlist.tags.map((tag) => (
-                    <span className="tag-chip" key={tag}>#{tag}</span>
+                    <span className="tag-chip" key={tag}>
+                      #{tag}
+                    </span>
                   ))}
                 </div>
               ) : null}
@@ -302,8 +338,15 @@ export function PlaylistDetailPage() {
                   disabled={likeSaving}
                   aria-pressed={likedPlaylist}
                 >
-                  <Heart size={15} fill={likedPlaylist ? 'currentColor' : 'none'} />
-                  {likeSaving ? '처리 중' : likedPlaylist ? '좋아요 취소' : '좋아요'}
+                  <Heart
+                    size={15}
+                    fill={likedPlaylist ? 'currentColor' : 'none'}
+                  />
+                  {likeSaving
+                    ? '처리 중'
+                    : likedPlaylist
+                      ? '좋아요 취소'
+                      : '좋아요'}
                 </button>
                 <button
                   className="btn btn-sm btn-outline-secondary"
@@ -334,13 +377,27 @@ export function PlaylistDetailPage() {
                       type="button"
                       onClick={() =>
                         refreshFrom(() =>
-                          updatePlaylistVisibility(id, publicPlaylist ? 'N' : 'Y'),
+                          updatePlaylistVisibility(
+                            id,
+                            publicPlaylist ? 'N' : 'Y'
+                          )
                         )
                       }
                     >
-                      {publicPlaylist ? <Lock size={15} /> : <Unlock size={15} />} 공개전환
+                      {publicPlaylist ? (
+                        <>
+                          <Lock size={15} /> 비공개 전환
+                        </>
+                      ) : (
+                        <>
+                          <Unlock size={15} /> 공개 전환
+                        </>
+                      )}
                     </button>
-                    <Link className="btn btn-sm btn-outline-secondary" to={`/playlists/${id}/edit`}>
+                    <Link
+                      className="btn btn-sm btn-outline-secondary"
+                      to={`/playlists/${id}/edit`}
+                    >
                       <Edit3 size={15} /> 수정
                     </Link>
                     <button
@@ -366,7 +423,9 @@ export function PlaylistDetailPage() {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div>
                 <h2 className="h4 fw-bold mb-0">수록곡</h2>
-                <p className="small text-secondary mb-0">총 {sortedTracks.length}곡</p>
+                <p className="small text-secondary mb-0">
+                  총 {sortedTracks.length}곡
+                </p>
               </div>
               <div className="d-flex flex-wrap justify-content-end gap-2">
                 <button
@@ -398,16 +457,22 @@ export function PlaylistDetailPage() {
                       disabled={!reorderDirty || reorderSaving}
                       onClick={saveTrackOrder}
                     >
-                      <Save size={15} /> {reorderSaving ? '저장 중' : '순서 저장'}
+                      <Save size={15} />{' '}
+                      {reorderSaving ? '저장 중' : '순서 저장'}
                     </button>
-                    <Link className="btn btn-sm btn-accent" to={`/playlists/${id}/add-tracks`}>
+                    <Link
+                      className="btn btn-sm btn-accent"
+                      to={`/playlists/${id}/add-tracks`}
+                    >
                       <Plus size={15} /> 곡 추가
                     </Link>
                   </>
                 ) : null}
               </div>
             </div>
-            {tracks.length === 0 ? <EmptyView title="아직 수록곡이 없습니다." /> : null}
+            {tracks.length === 0 ? (
+              <EmptyView title="아직 수록곡이 없습니다." />
+            ) : null}
             {isOwner ? (
               <p className="small text-secondary mb-2">
                 {trackSort === 'position'
@@ -434,7 +499,10 @@ export function PlaylistDetailPage() {
                   onDragEnd={() => setDraggedTrackKey(null)}
                 >
                   {canReorder ? (
-                    <span className="track-drag-handle" aria-label="곡 순서 이동">
+                    <span
+                      className="track-drag-handle"
+                      aria-label="곡 순서 이동"
+                    >
                       <GripVertical size={16} />
                     </span>
                   ) : null}
@@ -452,7 +520,9 @@ export function PlaylistDetailPage() {
                       className="btn btn-sm btn-outline-danger track-delete-button"
                       aria-label="트랙 삭제"
                       onClick={() =>
-                        refreshFrom(() => removeTrackFromPlaylist(id, track.playlistTrackId))
+                        refreshFrom(() =>
+                          removeTrackFromPlaylist(id, track.playlistTrackId)
+                        )
                       }
                     >
                       <Trash2 size={15} />
@@ -463,7 +533,10 @@ export function PlaylistDetailPage() {
             </div>
             <section className="mt-5">
               <h2 className="h5 fw-bold">댓글</h2>
-              <form className="d-flex flex-nowrap gap-2 mb-3" onSubmit={submitComment}>
+              <form
+                className="d-flex flex-nowrap gap-2 mb-3"
+                onSubmit={submitComment}
+              >
                 <input
                   className="form-control min-w-0"
                   placeholder="댓글을 입력하세요"
@@ -474,25 +547,35 @@ export function PlaylistDetailPage() {
                   작성
                 </button>
               </form>
-              {comments.length === 0 ? <EmptyView title="아직 댓글이 없습니다." /> : null}
+              {comments.length === 0 ? (
+                <EmptyView title="아직 댓글이 없습니다." />
+              ) : null}
               <div className="d-grid gap-2">
                 {pagedComments.items.map((item) => (
                   <article className="comment-item p-3" key={item.commentId}>
                     <div className="d-flex justify-content-between gap-3 align-items-start">
                       <div className="min-w-0 flex-grow-1">
                         <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
-                          <strong>{item.userNickname || `user-${item.userId}`}</strong>
-                          <span className="small text-secondary">{getCommentDateLabel(item)}</span>
+                          <strong>
+                            {item.userNickname || `user-${item.userId}`}
+                          </strong>
+                          <span className="small text-secondary">
+                            {getCommentDateLabel(item)}
+                          </span>
                         </div>
                         {editingCommentId === item.commentId ? (
                           <form
                             className="d-flex flex-nowrap gap-2"
-                            onSubmit={(event) => submitEditComment(event, item.commentId)}
+                            onSubmit={(event) =>
+                              submitEditComment(event, item.commentId)
+                            }
                           >
                             <input
                               className="form-control form-control-sm min-w-0"
                               value={editingComment}
-                              onChange={(event) => setEditingComment(event.target.value)}
+                              onChange={(event) =>
+                                setEditingComment(event.target.value)
+                              }
                               aria-label="댓글 수정 내용"
                             />
                             <button
@@ -531,7 +614,11 @@ export function PlaylistDetailPage() {
                             className="btn btn-sm btn-outline-danger comment-icon-button"
                             aria-label="댓글 삭제"
                             title="댓글 삭제"
-                            onClick={() => refreshFrom(() => deletePlaylistComment(id, item.commentId))}
+                            onClick={() =>
+                              refreshFrom(() =>
+                                deletePlaylistComment(id, item.commentId)
+                              )
+                            }
                           >
                             <Trash2 size={15} />
                           </button>
@@ -541,7 +628,11 @@ export function PlaylistDetailPage() {
                   </article>
                 ))}
               </div>
-              <Pager page={commentPage} totalPages={pagedComments.totalPages} onPageChange={setCommentPage} />
+              <Pager
+                page={commentPage}
+                totalPages={pagedComments.totalPages}
+                onPageChange={setCommentPage}
+              />
             </section>
           </section>
         </div>
@@ -556,7 +647,9 @@ function sortTracks(tracks, sortKey) {
     return sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
   }
   if (sortKey === 'artist') {
-    return sorted.sort((a, b) => (a.artistName || '').localeCompare(b.artistName || ''))
+    return sorted.sort((a, b) =>
+      (a.artistName || '').localeCompare(b.artistName || '')
+    )
   }
   return sorted.sort((a, b) => (a.positionNo ?? 0) - (b.positionNo ?? 0))
 }
@@ -578,7 +671,9 @@ function getTrackKey(track) {
 
 function isLikedPlaylist(playlist) {
   if (typeof playlist?.liked === 'boolean') return playlist.liked
-  return ['Y', 'TRUE', 'LIKED'].includes(String(playlist?.liked || playlist?.likeStatus || '').toUpperCase())
+  return ['Y', 'TRUE', 'LIKED'].includes(
+    String(playlist?.liked || playlist?.likeStatus || '').toUpperCase()
+  )
 }
 
 function isMyComment(comment, userId) {
