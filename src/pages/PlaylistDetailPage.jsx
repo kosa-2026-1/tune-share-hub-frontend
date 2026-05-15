@@ -58,20 +58,14 @@ export function PlaylistDetailPage() {
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingComment, setEditingComment] = useState('')
   const [commentSaving, setCommentSaving] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
   const shareNoticeTimerRef = useRef(null)
   const { data, loading, error, execute, setData } = useAsync(async () => {
-    const [playlist, myPlaylists] = await Promise.all([
-      getPlaylistDetail(id),
-      getMyPlaylists().catch(() => []),
-    ])
-    return {
-      playlist,
-      isOwner: isOwnedPlaylist(playlist, userId, myPlaylists),
-    }
+    const playlist = await getPlaylistDetail(id)
+    return { playlist }
   }, [id, userId])
 
   const playlist = data?.playlist
-  const isOwner = Boolean(data?.isOwner)
   const tracks = useMemo(() => playlist?.tracks || [], [playlist])
   const trackSource = useMemo(
     () => (localTracks.length || tracks.length === 0 ? localTracks : sortTracks(tracks, 'position')),
@@ -91,6 +85,40 @@ export function PlaylistDetailPage() {
     const result = await action()
     setData((prev) => ({ ...prev, playlist: result }))
   }
+
+  useEffect(() => {
+    let active = true
+
+    setIsOwner(false)
+    if (!playlist || !userId) {
+      return () => {
+        active = false
+      }
+    }
+
+    if (isOwnedPlaylist(playlist, userId)) {
+      setIsOwner(true)
+      return () => {
+        active = false
+      }
+    }
+
+    getMyPlaylists()
+      .then((myPlaylists) => {
+        if (active) {
+          setIsOwner(isOwnedPlaylist(playlist, userId, myPlaylists))
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setIsOwner(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [playlist, userId])
 
   useEffect(() => {
     setLocalTracks(sortTracks(tracks, 'position'))
