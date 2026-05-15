@@ -14,7 +14,7 @@ export function RankingPage() {
   )
   const ranking = data || []
   const podium = ranking.slice(0, 3)
-  const rest = ranking.slice(3, 8)
+  const rest = ranking.slice(3)
   const title = rankingType === 'view' ? '조회수 랭킹' : '좋아요 랭킹'
 
   return (
