@@ -8,6 +8,7 @@ import {
   getPlaylistDetail,
   removeTrackFromPlaylist,
   reorderPlaylistTracks,
+  searchPlaylists,
   togglePlaylistLike,
   updatePlaylistVisibility,
 } from './playlistApi.js'
@@ -81,6 +82,16 @@ describe('playlistApi', () => {
       method: 'patch',
       url: '/api/playlists/10/visibility',
       params: { publicYn: 'N' },
+    })
+  })
+
+  it('searches public playlists by keyword', async () => {
+    await searchPlaylists(' 로맨틱 ')
+
+    expect(request).toHaveBeenCalledWith({
+      method: 'get',
+      url: '/api/playlists/search',
+      params: { keyword: '로맨틱' },
     })
   })
 })

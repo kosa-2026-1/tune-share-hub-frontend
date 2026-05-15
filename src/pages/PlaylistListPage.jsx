@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getPublicPlaylists } from '../api/playlistApi.js'
+import { getPublicPlaylists, searchPlaylists } from '../api/playlistApi.js'
 import { Pager } from '../components/Pager.jsx'
 import { PlaylistCard } from '../components/PlaylistCard.jsx'
 import { EmptyView, ErrorView, LoadingView } from '../components/StatusView.jsx'
@@ -10,34 +10,42 @@ import { getTrackCount } from '../utils/format.js'
 const PAGE_SIZE = 8
 
 export function PlaylistListPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const keyword = searchParams.get('keyword')?.trim() || ''
+  const [searchParams] = useSearchParams()
+  const keyword = (searchParams.get('keyword') || '').trim()
+  const searchMode = Boolean(keyword)
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState('new')
-  const { data, loading, error, execute } = useAsync(
-    () => getPublicPlaylists({ page, size: PAGE_SIZE }),
-    [page],
-  )
+  const { data, loading, error, execute } = useAsync(async () => {
+    if (searchMode) {
+      const items = await searchPlaylists(keyword)
+      return {
+        items: Array.isArray(items) ? items : [],
+        page: 1,
+        size: Array.isArray(items) ? items.length : 0,
+        totalPages: 1,
+        totalElements: Array.isArray(items) ? items.length : 0,
+      }
+    }
 
-  const playlists = filterPlaylists(data?.items || [], keyword).sort((a, b) => {
+    return getPublicPlaylists({ page, size: PAGE_SIZE })
+  }, [page, keyword, searchMode])
+
+  const playlists = [...(data?.items || [])].sort((a, b) => {
     if (sort === 'like') return (b.likeCount || 0) - (a.likeCount || 0)
     if (sort === 'track') return getTrackCount(b) - getTrackCount(a)
     return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
   })
-
-  function clearKeyword() {
-    setSearchParams({})
-    setPage(1)
-  }
 
   return (
     <main className="page-section">
       <div className="container-xxl">
         <div className="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
           <div>
-            <h1 className="h2 fw-bold">공개 플레이리스트</h1>
+            <h1 className="h2 fw-bold">
+              {searchMode ? '플레이리스트 검색 결과' : '공개 플레이리스트'}
+            </h1>
             <p className="text-secondary mb-0">
-              {keyword ? `"${keyword}" 검색 결과` : '모든 공개 플레이리스트를 탐색하세요'}
+              {searchMode ? `"${keyword}" 검색 결과입니다.` : '모든 공개 플레이리스트를 탐색하세요'}
             </p>
           </div>
           <Link to="/playlists/new" className="btn btn-accent">
@@ -60,16 +68,11 @@ export function PlaylistListPage() {
               {label}
             </button>
           ))}
-          {keyword ? (
-            <button type="button" className="btn btn-sm btn-outline-secondary ms-auto" onClick={clearKeyword}>
-              검색 초기화
-            </button>
-          ) : null}
         </div>
         {loading ? <LoadingView /> : null}
         {error ? <ErrorView error={error} onRetry={execute} /> : null}
         {!loading && !error && playlists.length === 0 ? (
-          <EmptyView title={keyword ? '검색 결과가 없습니다.' : undefined} />
+          <EmptyView title={searchMode ? '검색된 플레이리스트가 없습니다.' : '표시할 항목이 없습니다.'} />
         ) : null}
         <div className="row g-3">
           {playlists.map((playlist) => (
@@ -82,22 +85,4 @@ export function PlaylistListPage() {
       </div>
     </main>
   )
-}
-
-function filterPlaylists(playlists, keyword) {
-  const normalizedKeyword = keyword.trim().toLowerCase()
-  if (!normalizedKeyword) return [...playlists]
-
-  return playlists.filter((playlist) => {
-    const searchableText = [
-      playlist.title,
-      playlist.description,
-      ...(Array.isArray(playlist.tags) ? playlist.tags : []),
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
-
-    return searchableText.includes(normalizedKeyword)
-  })
 }

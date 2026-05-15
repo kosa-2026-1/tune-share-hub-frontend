@@ -14,6 +14,14 @@ export async function getPlaylistRanking(limit = 10, type = 'like') {
   return request({ method: 'get', url: '/api/playlists/ranking', params: { limit, type } })
 }
 
+export async function searchPlaylists(keyword) {
+  return request({
+    method: 'get',
+    url: '/api/playlists/search',
+    params: { keyword: keyword.trim() },
+  })
+}
+
 export async function getMyPlaylists() {
   return request({ method: 'get', url: '/api/users/me/playlists' })
 }

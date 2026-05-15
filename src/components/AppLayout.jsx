@@ -22,12 +22,13 @@ export function AppLayout() {
   function submitGlobalSearch(event) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const keyword = formData.get('keyword')?.toString().trim()
-    if (keyword) {
-      navigate(`/playlists?keyword=${encodeURIComponent(keyword)}`)
-      setOpen(false)
-      event.currentTarget.reset()
-    }
+    const keyword = String(formData.get('keyword') || '').trim()
+
+    if (!keyword) return
+
+    setOpen(false)
+    navigate(`/playlists?keyword=${encodeURIComponent(keyword)}`)
+    event.currentTarget.reset()
   }
 
   return (
@@ -37,12 +38,16 @@ export function AppLayout() {
           <Link to="/" className="brand-mark">
             ♪ Tune Share Hub
           </Link>
-          <form className="search-pill d-none d-lg-flex align-items-center px-3" onSubmit={submitGlobalSearch}>
+          <form
+            className="search-pill d-none d-lg-flex align-items-center px-3"
+            onSubmit={submitGlobalSearch}
+          >
             <Search size={16} className="text-secondary me-2" />
             <input
               className="form-control form-control-sm border-0 bg-transparent shadow-none"
               name="keyword"
               placeholder="플레이리스트 검색"
+              aria-label="플레이리스트 검색"
             />
           </form>
           <button
@@ -93,12 +98,16 @@ export function AppLayout() {
                 로그아웃
               </button>
             </div>
-            <form className="search-pill d-flex d-lg-none align-items-center px-3 mt-3" onSubmit={submitGlobalSearch}>
+            <form
+              className="search-pill d-flex d-lg-none align-items-center px-3 mt-3"
+              onSubmit={submitGlobalSearch}
+            >
               <Search size={16} className="text-secondary me-2" />
               <input
                 className="form-control form-control-sm border-0 bg-transparent shadow-none"
                 name="keyword"
                 placeholder="플레이리스트 검색"
+                aria-label="플레이리스트 검색"
               />
             </form>
           </div>
